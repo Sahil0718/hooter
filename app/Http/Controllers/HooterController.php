@@ -34,18 +34,25 @@ class HooterController extends Controller
      */
     public function store(Request $request)
     {
-        //Firstly validating the request 
-        $validated = $request->validate(
-            [
-                'message' => 'required|string|max:255|min:5',
-            ]
-        );
+        $validated = $request->validate([
+            'message' => 'required|string|min:5|max:255',
+        ]);
 
-        // Use the authenticated user
-        auth()->user()->hoots()->create($validated);
+        // If user is logged in
+        if (auth()->check()) {
+            auth()->user()->hoots()->create($validated);
+        } else {
+            // If guest, create hoot manually and mark anonymous
+            \App\Models\Hoot::create([
+                'message' => $validated['message'],
+                'user_id' => null, 
+                'is_anonymous' => true,
+            ]);
+        }
 
-        return redirect('/')->with('success', 'Hoot has been created!');
+        return redirect()->back()->with('success', 'Hoot posted successfully!');
     }
+
 
     /**
      * Display the specified resource.
@@ -60,7 +67,7 @@ class HooterController extends Controller
      */
     public function edit(Hoot $hoot)
     {
-        $this -> authorize('update', $hoot);
+        $this->authorize('update', $hoot);
         return view('hoots.edit', compact('hoot'));
     }
 
@@ -70,14 +77,14 @@ class HooterController extends Controller
     public function update(Request $request, Hoot $hoot)
     {
 
-        $this -> authorize('update', $hoot);
+        $this->authorize('update', $hoot);
 
         //Firstly validating the request 
         $validated = $request->validate([
             'message' => 'required|string|max:255|min:5',
         ]);
 
-       $hoot -> update($validated);
+        $hoot->update($validated);
 
 
         return redirect('/')->with('success', 'Your hoot has been updated!');
@@ -88,7 +95,7 @@ class HooterController extends Controller
      */
     public function destroy(Hoot $hoot)
     {
-        $this -> authorize('delete', $hoot);
+        $this->authorize('delete', $hoot);
         $hoot->delete();
         return redirect('/')->with('success', 'Your hoot has been deleted!');
     }

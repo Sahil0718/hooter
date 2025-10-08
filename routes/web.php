@@ -8,12 +8,16 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HooterController::class, 'index']);
 
-Route::middleware('auth') -> group(function(){
-    Route::post('/hoots', [HooterController::class, 'store']);
-    Route::get('/hoots/{hoot}/edit', [HooterController::class, 'edit']); //{} this is called route model binding
+// Allow everyone (even guests) to post hoots
+Route::post('/hoots', [HooterController::class, 'store'])->name('hoots.store');
+
+// Keep editing/updating/deleting restricted to logged-in users
+Route::middleware('auth')->group(function () {
+    Route::get('/hoots/{hoot}/edit', [HooterController::class, 'edit']);
     Route::put('/hoots/{hoot}', [HooterController::class, 'update']);
     Route::delete('/hoots/{hoot}', [HooterController::class, 'destroy']);
 });
+
 
 //REGISTER ROUTES
 Route::view('/register','auth.register')

@@ -54,6 +54,8 @@
             <p>© 2025 Hooter - Built with Laravel and Power of Dal Bhat 💪</p>
         </div>
     </footer>
+
+    <script src="https://js.pusher.com/beams/2.1.0/push-notifications-cdn.js"></script>
 </body>
 
 </html>

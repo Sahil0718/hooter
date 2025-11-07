@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Hoot;
+use App\Events\HootCreated;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -40,14 +41,17 @@ class HooterController extends Controller
 
         // If user is logged in
         if (auth()->check()) {
-            auth()->user()->hoots()->create($validated);
+            $hoot = auth()->user()->hoots()->create($validated);
+            // Broadcast creation
+            event(new HootCreated($hoot));
         } else {
             // If guest, create hoot manually and mark anonymous
-            \App\Models\Hoot::create([
+            $hoot = \App\Models\Hoot::create([
                 'message' => $validated['message'],
-                'user_id' => null, 
+                'user_id' => null,
                 'is_anonymous' => true,
             ]);
+            event(new HootCreated($hoot));
         }
 
         return redirect()->back()->with('success', 'Hoot posted successfully!');
